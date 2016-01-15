@@ -1,0 +1,29 @@
+#!/usr/bin/env python2
+
+from pwn import *
+
+context(log_level = logging.DEBUG)
+
+doing = term.output(float = True)
+
+solutions = (
+    'cat readme',
+    'cat ./-',
+    'cat spaces\ in\ this\ filename'
+)
+
+def solve(name,password,cmd):
+    doing.update('Solving %s' % name)
+    con = ssh(user = name, password = password, host = 'bandit.labs.overthewire.org')
+    shell = con.shell(tty= False)
+    shell.sendline(cmd)
+    next_password = shell.recvline().strip()
+    shell.close()
+    con.close()
+    doing.update('%s gave us %s\n' % (name, next_password))
+    return next_password
+
+password = 'bandit0'
+for i in range(0,len(solutions)):
+    password = solve('bandit%d' % i,password,solutions[i])
+
